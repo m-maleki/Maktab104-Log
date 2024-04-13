@@ -1,6 +1,8 @@
+using Maktab104_Log;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +11,15 @@ builder.Services.AddRazorPages();
 
 builder.Logging.ClearProviders();
 
-var config = new ConfigurationBuilder()
+var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
-    .Build();
+.Build();
 
-var connectionString = config.GetSection("Connections:ConnectionString").Value;
+var siteSettings = configuration.GetSection(nameof(SiteSettings)).Get<SiteSettings>();
+
+builder.Services.AddSingleton(siteSettings);
+
+var connectionString = configuration.GetSection("SiteSettings:ConnectionString").Value;
 
 var sinkOpts = new MSSqlServerSinkOptions()
 {
